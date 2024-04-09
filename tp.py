@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 # Función para calcular la TFD a partir de los coeficientes de la SFD
 def calcular_tfd(coeficientes_sfd):
-    tfd = np.fft.fft(coeficientes_sfd)
+    tfd = np.fft.ifft(coeficientes_sfd)
     return tfd
 
 # Función para calcular los coeficientes de la SFD
@@ -59,12 +59,13 @@ coeficientes_sfd_terremoto2 = calcular_coeficientes_sfd(datos_terremoto2)
 #graficar_coeficientes_sfd(coeficientes_sfd_terremoto2)
 
 # Calcular la TFD para cada conjunto de coeficientes de la SFD
-#tfd_terremoto1 = calcular_tfd(coeficientes_sfd_terremoto1)
+tfd_terremoto1 = calcular_tfd(calcular_coeficientes(datos_terremoto1))
 #tfd_terremoto2 = calcular_tfd(coeficientes_sfd_terremoto2)
 
-graficar_coeficientes(calcular_coeficientes(datos_terremoto1))
 
-#graficar_tfd(tfd_terremoto1)
+#graficar_coeficientes(calcular_coeficientes(datos_terremoto1))
+
+graficar_tfd(tfd_terremoto1)
 #graficar_tfd(tfd_terremoto2)
 
 # Imprimir los resultados o usarlos según sea necesario

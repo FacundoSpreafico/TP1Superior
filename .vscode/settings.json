@@ -4,6 +4,7 @@
         "coeficientes",
         "datos",
         "dtype",
+        "graficar",
         "terremoto"
     ]
 }
