@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 # Función para calcular la TFD a partir de los coeficientes de la SFD
 def calcular_tfd(coeficientes_sfd):
-    tfd = np.fft.ifft(coeficientes_sfd)
+    tfd = np.fft.fft(coeficientes_sfd)
     return tfd
 
 # Función para calcular los coeficientes de la SFD
@@ -12,14 +12,14 @@ def calcular_coeficientes_sfd(datos):
     coeficientes_sfd = (np.fft.fft(datos) / n)
     return coeficientes_sfd
 
-def dft(datos):
+def calcular_coeficientes(datos):
     N = datos.shape[0]
     n = np.arange(N)
     k = n.reshape((N, 1))
     M = np.exp(-2j * np.pi * k * n / N)
     return np.dot(M, datos) / N
 
-def graficar_coeficientes_sfd(coeficientes_sfd):
+def graficar_coeficientes(coeficientes_sfd):
     n = len(coeficientes_sfd)
     frecuencias = np.fft.fftfreq(n)
     plt.figure(figsize=(10, 6))
@@ -62,14 +62,7 @@ coeficientes_sfd_terremoto2 = calcular_coeficientes_sfd(datos_terremoto2)
 #tfd_terremoto1 = calcular_tfd(coeficientes_sfd_terremoto1)
 #tfd_terremoto2 = calcular_tfd(coeficientes_sfd_terremoto2)
 
-array_dft = []
-
-# Iterar sobre los primeros 10 elementos de la TFD y agregarlos al array
-for i in range(10):
-    array_dft.append(dft(datos_terremoto1)[i])
-
-graficar_coeficientes_sfd(dft(datos_terremoto1))
-
+graficar_coeficientes(calcular_coeficientes(datos_terremoto1))
 
 #graficar_tfd(tfd_terremoto1)
 #graficar_tfd(tfd_terremoto2)
