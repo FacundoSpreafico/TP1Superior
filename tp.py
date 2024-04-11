@@ -45,6 +45,7 @@ def suavizar_altas_frecuencias(datos):
 #Funcion para filtrar frecuencias (GPT)
 def filtrar(datos):
     ventana = np.ones(10)/10            #ventana movil de long 10
+                                        #podemos probar una ventana Hann para ver como queda ponele
     y = [p[1] for p in datos]
     y_suavizado = convolve(y, ventana, mode='same') / sum(ventana)
     datos_suavizados = [(datos[i][0], y_suavizado[i]) for i in range(len(datos))]
@@ -91,8 +92,8 @@ def graficar_senal(datos, datos_suavizados):
     # Graficar la señal original y la señal suavizada
     plt.figure(figsize=(10, 6))
     plt.plot(datos, label='Señal original')
-    plt.plot(datos_suavizados, label='Señal suavizada')
-    plt.title('Suavizado de altas frecuencias con ventana de tipo Hann')
+    plt.plot(datos_suavizados, label='Señal filtrada')
+    plt.title('Filtrado de altas frecuencias con ventana de tipo Hann')
     plt.xlabel('Tiempo')
     plt.ylabel('Aceleracion')
     plt.grid(True)
@@ -111,8 +112,8 @@ def graficar_senal_2(datos, datos_suavizados):
     # Graficar la señal original y la señal suavizada
     plt.figure(figsize=(10, 6))
     plt.plot(tiempo_datos, aceleracion_datos, label='Señal original')
-    plt.plot(tiempo_suavizado, aceleracion_suavizada, label='Señal suavizada')
-    plt.title('Suavizado de altas frecuencias')
+    plt.plot(tiempo_suavizado, aceleracion_suavizada, label='Señal filtrada')
+    plt.title('Filtrado de altas frecuencias')
     plt.xlabel('Tiempo')
     plt.ylabel('Aceleracion')
     plt.grid(True)
