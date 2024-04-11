@@ -4,6 +4,25 @@ import scipy.fft as sc
 from scipy.signal import convolve
 
 '''
+
+⢸⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⡷⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠢⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠈⠑⢦⡀⠀⠀⠀⠀⠀
+⢸⠀⠀⠀⠀⢀⠖⠒⠒⠒⢤⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠙⢦⡀⠀⠀⠀⠀
+⢸⠀⠀⣀⢤⣼⣀⡠⠤⠤⠼⠤⡄⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠙⢄⠀⠀⠀⠀
+⢸⠀⠀⠑⡤⠤⡒⠒⠒⡊⠙⡏⠀⢀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠑⠢⡄⠀
+⢸⠀⠀⠀⠇⠀⣀⣀⣀⣀⢀⠧⠟⠁⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀
+⢸⠀⠀⠀⠸⣀⠀⠀⠈⢉⠟⠓⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+⢸⠀⠀⠀⠀⠈⢱⡖⠋⠁⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+⢸⠀⠀⠀⠀⣠⢺⠧⢄⣀⠀⠀⣀⣀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+⢸⠀⠀⠀⣠⠃⢸⠀⠀⠈⠉⡽⠿⠯⡆⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+⢸⠀⠀⣰⠁⠀⢸⠀⠀⠀⠀⠉⠉⠉⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+⢸⠀⠀⠣⠀⠀⢸⢄⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+⢸⠀⠀⠀⠀⠀⢸⠀⢇⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+⢸⠀⠀⠀⠀⠀⡌⠀⠈⡆⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+⢸⠀⠀⠀⠀⢠⠃⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+⢸⠀⠀⠀⠀⢸⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠷      are you winning son?
+
     .       ⣀⣠⣤⠶⠦⠤⣤⣤⣤⣀⡀⠀⠀⠀⠀⠀⠀ ⠀⠀
 ⠀⠀    ⠀⢀⣤⠾⠋⠁⠁⠀⠀⠀⠀⠀⠀⠀⠈⠙⢦⡀⠀⠀⠀⠀ 
 ⠀⠀⠀⠀⣰⠟⠁⠀⠀⠀⠀⠀⠀⠀⣀⢀⠀⠀⠀⠀⠀⠙⢦⠀⠀⠀
@@ -20,7 +39,7 @@ from scipy.signal import convolve
         ⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠇⠏⠀⠀⠀⠀⠀⠀⠀ 
           ⠈⠻⣿⣿⣿⣿⣿⣿⣿⠁⠀⠀⢀⡀⠀⢀⣀⣀⠀
  ⠀⣀⣤⣤⣤⣴⣇⢰⣶⣤⣉⠙⠁⠋⠉⠀⠀⢀⣤⣾⣧⣠⣼⣿⣿⣮
- ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣶⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+ ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣶⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿  yes
 '''
 
 # Función para calcular la TFD a partir de los coeficientes de la SFD
@@ -36,16 +55,12 @@ def calcular_coeficientes(datos):
     M = np.exp(-2j * np.pi * k * n / N)         #Calcula el numero exponencial que tendra que ser multiplicado por la entrada x[n] (Datos)
     return np.dot(M, [dato[1] for dato in datos]) / N
 
-# Funcion para filtrar frecuencias
-def suavizar_altas_frecuencias(datos):
-    ventana = np.Hann(datos)  # Utilizar una ventana de tipo Hann
-    datos_suavizados = np.convolve(datos, ventana, mode='same')# Aplicar convolución
-    return datos_suavizados
-
 #Funcion para filtrar frecuencias (GPT)
 def filtrar(datos):
-    ventana = np.ones(10)/10            #ventana movil de long 10
-                                        #podemos probar una ventana Hann para ver como queda ponele
+    #ventana = np.ones(10)/10            #ventana movil de long 10
+    ventana = np.hanning(100)            #ventana hanning
+    #ventana = np.hamming(10)            #ventana hamming
+    #ventana = np.blackman(10)           #ventana blackman
     y = [p[1] for p in datos]
     y_suavizado = convolve(y, ventana, mode='same') / sum(ventana)
     datos_suavizados = [(datos[i][0], y_suavizado[i]) for i in range(len(datos))]
@@ -152,12 +167,9 @@ tfd_terremoto2 = calcular_tfd(coeficientes_sfd_terremoto2)
 print("\nFrecuencias para terremoto1: ", tfd_terremoto1)
 print("\nFrecuencias para terremoto2: ", tfd_terremoto2)
 
-#Filtrado de onda (revisar es el metodo viejo)
-#graficar_espectro(tfd_terremoto1, "Transformada de Fourier Discreta del terremoto 1")
-#graficar_espectro(filtrado(tfd_terremoto1, 0.5), "Filtrado de la onda del terremoto 1")
-
 # Suavizar las altas frecuencias de los terremotos y graficarlo
 datos_filtrados1 = filtrar(datos_terremoto1)
 graficar_senal_2(datos_terremoto1, datos_filtrados1)
 datos_filtrados2 = filtrar(datos_terremoto2)
 graficar_senal_2(datos_terremoto2, datos_filtrados2)
+
