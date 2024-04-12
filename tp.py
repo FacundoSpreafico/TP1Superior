@@ -81,16 +81,29 @@ def graficar_coeficientes_sfd(coeficientes_sfd):
     plt.legend()
     plt.show()
 
-def graficar_espectro(coeficientes_sfd, titulo):  # Graficar un bastón para cada step frecuencias
-    n = len(coeficientes_sfd)
+'''
+def graficar_espectro(datos, titulo):  # Graficar un bastón para cada step frecuencias
+    n = len(datos)
     frecuencias = np.fft.fftfreq(n)
-    plt.stem(frecuencias[::40], np.abs(coeficientes_sfd)[::40], linefmt='b-', markerfmt='bo', basefmt='k-')
+    plt.stem(frecuencias[::40], np.abs(datos)[::40], linefmt='b-', markerfmt='bo', basefmt='k-')
     plt.title(titulo)
     plt.xlabel('Frecuencia (Hz)')
     plt.ylabel('Magnitud')
     plt.grid(True)
     plt.show()    
-
+'''
+def graficar_espectro(datos, titulo, paso=20):
+    n = len(datos)
+    datos_array = np.array(datos)
+    frecuencias = np.fft.fftfreq(n)
+    magnitudes = np.abs(np.fft.fft(datos_array[:, 1]))
+    plt.stem(frecuencias[::paso], magnitudes[::paso], linefmt='b-', markerfmt='bo', basefmt='k-')
+    plt.title(titulo)
+    plt.xlabel('Frecuencia (Hz)')
+    plt.ylabel('Magnitud')
+    plt.grid(True)
+    plt.show()
+    
 def graficar_tfd(tfd):
     n = len(tfd)
     frecuencias = np.fft.fftfreq(n)
@@ -141,11 +154,17 @@ def cargar_datos(nombre_archivo):
         datos = [(float(punto[0]), float(punto[1])) for punto in datos]
     return datos
 
+def frecuencia_max(tfd):
+    
+
+
 ''' Cargado de datos viejo.
 # Cargar los datos desde los archivos txt
 datos_terremoto1 = np.loadtxt("terremoto1.txt", dtype=float)[:, 1]  # Solo cargamos la segunda columna
 datos_terremoto2 = np.loadtxt("terremoto2.txt", dtype=float)[:, 1]  # Solo cargamos la segunda columna
 '''
+
+
 
 #Cargado de datos 2.0 (hace un array de pares (tiempo, aceleracion))
 datos_terremoto1 = cargar_datos('terremoto1.txt')
@@ -169,7 +188,13 @@ print("\nFrecuencias para terremoto2: ", tfd_terremoto2)
 
 # Suavizar las altas frecuencias de los terremotos y graficarlo
 datos_filtrados1 = filtrar(datos_terremoto1)
-graficar_senal_2(datos_terremoto1, datos_filtrados1)
+#graficar_senal_2(datos_terremoto1, datos_filtrados1)
 datos_filtrados2 = filtrar(datos_terremoto2)
-graficar_senal_2(datos_terremoto2, datos_filtrados2)
+#graficar_senal_2(datos_terremoto2, datos_filtrados2)
+
+graficar_espectro(datos_terremoto1, 'Espectro de frecuencias terremoto1')
+graficar_espectro(datos_filtrados1, 'Filtrado 1')
+graficar_espectro(datos_terremoto2, 'Espectro de frecuencias terremoto2')
+graficar_espectro(datos_filtrados2, 'Filtrado 2')
+
 
