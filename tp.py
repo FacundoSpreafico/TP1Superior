@@ -49,11 +49,17 @@ def calcular_tfd(coeficientes_sfd):
 
 # Funcion para calcular los coeficientes de la serie de Fourier de la senal
 def calcular_coeficientes(datos):
-    N = len(datos)                         #Calcula la cantidad de entradas dentro del archivo
+    N = len(datos)                              #Calcula la cantidad de entradas dentro del archivo
     n = np.arange(N)                            #Hace un arreglo con valores desde 0 a N-1
     k = n.reshape((N, 1))                       #Hace el arreglo n como un vector columna
     M = np.exp(-2j * np.pi * k * n / N)         #Calcula el numero exponencial que tendra que ser multiplicado por la entrada x[n] (Datos)
     return np.dot(M, [dato[1] for dato in datos]) / N
+
+#Funcion para sacar las frecuencias de la TFD
+def frecuencias_tfd(frecuencia_muestreo, datos):
+    N=len(datos)
+    frecuencias = np.fft.fftfreq(N)
+    return frecuencias
 
 #Funcion para filtrar frecuencias (GPT)
 def filtrar(datos):
@@ -66,32 +72,14 @@ def filtrar(datos):
     datos_suavizados = [(datos[i][0], y_suavizado[i]) for i in range(len(datos))]
     return datos_suavizados
 
-def graficar_coeficientes_sfd(coeficientes_sfd):
-    n = len(coeficientes_sfd)
-    #frecuencias = np.fft.fftfreq(n)
-    plt.figure(figsize=(10, 6))
-    #plt.plot(frecuencias, np.abs(coeficientes_sfd), label='Magnitud')
-    frecuencias = np.fft.fftfreq(n)[:100]
-    plt.stem(frecuencias, np.abs(coeficientes_sfd)[:100], linefmt='b-', markerfmt='bo', basefmt='k-') 
-    #plt.stem(frecuencias, np.abs(coeficientes_sfd), linefmt='b-', markerfmt='bo', basefmt='k-')
-    plt.title('Coeficientes de la Serie de Fourier Discreta')
-    plt.xlabel('Frecuencia (Hz)')
-    plt.ylabel('Magnitud')
-    plt.grid(True)
-    plt.legend()
-    plt.show()
+# Función para determinar las frecuencias más afectadas
+def frecuencias_mas_afectadas(tfd, coeficientes):
+    # Encontrar el índice del coeficiente máximo
+    indice_max = np.argmax(coeficientes)
+    frecuencia_afectada = tfd[indice_max]
+    #coef_max = coeficientes[indice_max]
+    return frecuencia_afectada
 
-'''
-def graficar_espectro(datos, titulo):  # Graficar un bastón para cada step frecuencias
-    n = len(datos)
-    frecuencias = np.fft.fftfreq(n)
-    plt.stem(frecuencias[::40], np.abs(datos)[::40], linefmt='b-', markerfmt='bo', basefmt='k-')
-    plt.title(titulo)
-    plt.xlabel('Frecuencia (Hz)')
-    plt.ylabel('Magnitud')
-    plt.grid(True)
-    plt.show()    
-'''
 def graficar_espectro(datos, titulo, paso=20):
     n = len(datos)
     datos_array = np.array(datos)
@@ -103,32 +91,16 @@ def graficar_espectro(datos, titulo, paso=20):
     plt.ylabel('Magnitud')
     plt.grid(True)
     plt.show()
-    
-def graficar_tfd(tfd):
-    n = len(tfd)
-    frecuencias = np.fft.fftfreq(n)
-    plt.figure(figsize=(10, 6))
-    plt.plot(frecuencias, np.abs(tfd), label='Magnitud')
-    plt.title('Transformada de Fourier Discreta (TFD)')
-    plt.xlabel('Frecuencia')
+
+def graficar_espectro2(frecuencias, magnitudes, titulo, paso=20):
+    plt.stem(frecuencias[::paso], magnitudes[::paso], linefmt='b-', markerfmt='bo', basefmt='k-')
+    plt.title(titulo)
+    plt.xlabel('Frecuencia (Hz)')
     plt.ylabel('Magnitud')
     plt.grid(True)
-    plt.legend()
     plt.show()
 
 def graficar_senal(datos, datos_suavizados):
-    # Graficar la señal original y la señal suavizada
-    plt.figure(figsize=(10, 6))
-    plt.plot(datos, label='Señal original')
-    plt.plot(datos_suavizados, label='Señal filtrada')
-    plt.title('Filtrado de altas frecuencias con ventana de tipo Hann')
-    plt.xlabel('Tiempo')
-    plt.ylabel('Aceleracion')
-    plt.grid(True)
-    plt.legend()
-    plt.show()
-
-def graficar_senal_2(datos, datos_suavizados):
     # Extraer componentes de tiempo y aceleración de los datos originales
     tiempo_datos = [par[0] for par in datos]
     aceleracion_datos = [par[1] for par in datos]
@@ -154,18 +126,6 @@ def cargar_datos(nombre_archivo):
         datos = [(float(punto[0]), float(punto[1])) for punto in datos]
     return datos
 
-def frecuencia_max(tfd):
-    
-
-
-''' Cargado de datos viejo.
-# Cargar los datos desde los archivos txt
-datos_terremoto1 = np.loadtxt("terremoto1.txt", dtype=float)[:, 1]  # Solo cargamos la segunda columna
-datos_terremoto2 = np.loadtxt("terremoto2.txt", dtype=float)[:, 1]  # Solo cargamos la segunda columna
-'''
-
-
-
 #Cargado de datos 2.0 (hace un array de pares (tiempo, aceleracion))
 datos_terremoto1 = cargar_datos('terremoto1.txt')
 datos_terremoto2 = cargar_datos('terremoto2.txt')
@@ -173,6 +133,10 @@ datos_terremoto2 = cargar_datos('terremoto2.txt')
 #Calcular los coeficientes de la SFD para cada conjunto de datos
 coeficientes_sfd_terremoto1 = calcular_coeficientes(datos_terremoto1)
 coeficientes_sfd_terremoto2 = calcular_coeficientes(datos_terremoto2)
+
+#Calcula las frecuencias de la TFD
+frecuencias_terremoto1 = frecuencias_tfd(100, datos_terremoto1)
+frecuencias_terremoto2 = frecuencias_tfd(100, datos_terremoto2)
 
 #Imprimir los coeficientes de Fourier
 print("Coeficientes de la serie de Fourier para terremoto1: ", coeficientes_sfd_terremoto1)
@@ -188,13 +152,37 @@ print("\nFrecuencias para terremoto2: ", tfd_terremoto2)
 
 # Suavizar las altas frecuencias de los terremotos y graficarlo
 datos_filtrados1 = filtrar(datos_terremoto1)
-#graficar_senal_2(datos_terremoto1, datos_filtrados1)
+graficar_senal(datos_terremoto1, datos_filtrados1)
 datos_filtrados2 = filtrar(datos_terremoto2)
-#graficar_senal_2(datos_terremoto2, datos_filtrados2)
+graficar_senal(datos_terremoto2, datos_filtrados2)
 
-graficar_espectro(datos_terremoto1, 'Espectro de frecuencias terremoto1')
-graficar_espectro(datos_filtrados1, 'Filtrado 1')
-graficar_espectro(datos_terremoto2, 'Espectro de frecuencias terremoto2')
-graficar_espectro(datos_filtrados2, 'Filtrado 2')
+#Frecuencia mas afectada
+frecuencias_afectadas1 = frecuencias_mas_afectadas(frecuencias_terremoto1, coeficientes_sfd_terremoto1)
+print("\nLa frecuencia mas afectada en el terremoto1 antes del filtrado fue de ", frecuencias_afectadas1, " Hz")
 
+coeficientes_sfd_terremoto1_suavizado = calcular_coeficientes(datos_filtrados1)
+frecuencias_afectadadas1_suavizadas = frecuencias_mas_afectadas(frecuencias_terremoto1, coeficientes_sfd_terremoto1_suavizado)
+print("\nLa frecuencia mas afectada en el terremoto1 despues del filtrado fue de ", frecuencias_afectadadas1_suavizadas, " Hz")
 
+frecuencias_afectadas2 = frecuencias_mas_afectadas(frecuencias_terremoto2, coeficientes_sfd_terremoto2)
+print("\nLa frecuencia mas afectada en el terremoto2 antes del filtrado fue de ", frecuencias_afectadas2, " Hz")
+
+coeficientes_sfd_terremoto2_suavizado = calcular_coeficientes(datos_filtrados2)
+frecuencias_afectadadas2_suavizadas = frecuencias_mas_afectadas(frecuencias_terremoto2, coeficientes_sfd_terremoto2_suavizado)
+print("\nLa frecuencia mas afectada en el terremoto2 despues del filtrado fue de ", frecuencias_afectadadas2_suavizadas, " Hz")
+
+'''
+frecuencias_afectadas2 = frecuencias_mas_afectadas(frecuencias_terremoto2, coeficientes_sfd_terremoto2)
+print("\nLa frecuencia mas afectada en el terremoto2 antes del filtrado fue de ", frecuencias_afectadas2, " Hz")
+'''
+
+#Graficado de los espectros antes y despues del filtrado
+#graficar_espectro(datos_terremoto1, 'Espectro de frecuencias terremoto1')
+#graficar_espectro(datos_filtrados1, 'Filtrado 1')
+#graficar_espectro(datos_terremoto2, 'Espectro de frecuencias terremoto2')
+#graficar_espectro(datos_filtrados2, 'Filtrado 2')
+
+graficar_espectro2(frecuencias_terremoto1, abs(tfd_terremoto1), 'Espectro de frecuencias terremoto1')
+graficar_espectro2(frecuencias_terremoto2, abs(tfd_terremoto2), 'Espectro de frecuencias terremoto2')
+graficar_espectro2(frecuencias_terremoto1, abs(calcular_tfd(coeficientes_sfd_terremoto1_suavizado)), 'Espectro de frecuencias filtradas terremoto1')
+graficar_espectro2(frecuencias_terremoto2, abs(calcular_tfd(coeficientes_sfd_terremoto2_suavizado)), 'Espectro de frecuencias filtradas terremoto2')
