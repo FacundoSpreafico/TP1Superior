@@ -45,7 +45,7 @@ from scipy.signal import convolve
 # Función para calcular la TFD a partir de los coeficientes de la SFD
 def calcular_tfd(coeficientes_sfd):
     N = len(coeficientes_sfd)
-    return coeficientes_sfd * N                 #Calcula la TFD multiplicando los coeficientes de la serie de Fourier por N
+    return abs(coeficientes_sfd * N)                 #Calcula la TFD multiplicando los coeficientes de la serie de Fourier por N
 
 # Funcion para calcular los coeficientes de la serie de Fourier de la senal
 def calcular_coeficientes(datos):
@@ -58,7 +58,7 @@ def calcular_coeficientes(datos):
 #Funcion para sacar las frecuencias de la TFD
 def frecuencias_tfd(frecuencia_muestreo, datos):
     N=len(datos)
-    frecuencias = np.fft.fftfreq(N)
+    frecuencias = np.fft.fftfreq(N, 1/frecuencia_muestreo)
     return frecuencias
 
 #Funcion para filtrar frecuencias (GPT)
@@ -77,22 +77,18 @@ def frecuencias_mas_afectadas(tfd, coeficientes):
     # Encontrar el índice del coeficiente máximo
     indice_max = np.argmax(coeficientes)
     frecuencia_afectada = tfd[indice_max]
-    #coef_max = coeficientes[indice_max]
-    return frecuencia_afectada
+    return np.abs(frecuencia_afectada)
 
-def graficar_espectro(datos, titulo, paso=20):
-    n = len(datos)
-    datos_array = np.array(datos)
-    frecuencias = np.fft.fftfreq(n)
-    magnitudes = np.abs(np.fft.fft(datos_array[:, 1]))
-    plt.stem(frecuencias[::paso], magnitudes[::paso], linefmt='b-', markerfmt='bo', basefmt='k-')
-    plt.title(titulo)
+def graficar_espectro_continuo(freq, coeficientes, titulo):
+    # Graficar el espectro de frecuencias
+    plt.plot(freq, coeficientes)
+    plt.title('Espectro de frecuencias de ' + titulo)
     plt.xlabel('Frecuencia (Hz)')
-    plt.ylabel('Magnitud')
-    plt.grid(True)
+    plt.ylabel('Amplitud')
+    plt.tight_layout()
     plt.show()
 
-def graficar_espectro2(frecuencias, magnitudes, titulo, paso=20):
+def graficar_espectro_discreto(frecuencias, magnitudes, titulo, paso=20):
     plt.stem(frecuencias[::paso], magnitudes[::paso], linefmt='b-', markerfmt='bo', basefmt='k-')
     plt.title(titulo)
     plt.xlabel('Frecuencia (Hz)')
@@ -136,7 +132,7 @@ coeficientes_sfd_terremoto2 = calcular_coeficientes(datos_terremoto2)
 
 #Calcula las frecuencias de la TFD
 frecuencias_terremoto1 = frecuencias_tfd(100, datos_terremoto1)
-frecuencias_terremoto2 = frecuencias_tfd(100, datos_terremoto2)
+frecuencias_terremoto2 = frecuencias_tfd(200, datos_terremoto2)
 
 #Imprimir los coeficientes de Fourier
 print("Coeficientes de la serie de Fourier para terremoto1: ", coeficientes_sfd_terremoto1)
@@ -171,18 +167,17 @@ coeficientes_sfd_terremoto2_suavizado = calcular_coeficientes(datos_filtrados2)
 frecuencias_afectadadas2_suavizadas = frecuencias_mas_afectadas(frecuencias_terremoto2, coeficientes_sfd_terremoto2_suavizado)
 print("\nLa frecuencia mas afectada en el terremoto2 despues del filtrado fue de ", frecuencias_afectadadas2_suavizadas, " Hz")
 
+'''FIJARSE POR QUE DA EL DOBLE PARA EL SEGUNDO TERREMOTO'''
+
 '''
 frecuencias_afectadas2 = frecuencias_mas_afectadas(frecuencias_terremoto2, coeficientes_sfd_terremoto2)
 print("\nLa frecuencia mas afectada en el terremoto2 antes del filtrado fue de ", frecuencias_afectadas2, " Hz")
 '''
+#Graficado de espectro discreto
+#graficar_espectro_discreto(frecuencias_terremoto1, abs(tfd_terremoto1), 'Espectro de frecuencias terremoto1')
+#graficar_espectro_discreto(frecuencias_terremoto2, abs(tfd_terremoto2), 'Espectro de frecuencias terremoto2')
+#graficar_espectro_discreto(frecuencias_terremoto1, abs(calcular_tfd(coeficientes_sfd_terremoto1_suavizado)), 'Espectro de frecuencias filtradas terremoto1')
+#graficar_espectro_discreto(frecuencias_terremoto2, abs(calcular_tfd(coeficientes_sfd_terremoto2_suavizado)), 'Espectro de frecuencias filtradas terremoto2')
 
-#Graficado de los espectros antes y despues del filtrado
-#graficar_espectro(datos_terremoto1, 'Espectro de frecuencias terremoto1')
-#graficar_espectro(datos_filtrados1, 'Filtrado 1')
-#graficar_espectro(datos_terremoto2, 'Espectro de frecuencias terremoto2')
-#graficar_espectro(datos_filtrados2, 'Filtrado 2')
-
-graficar_espectro2(frecuencias_terremoto1, abs(tfd_terremoto1), 'Espectro de frecuencias terremoto1')
-graficar_espectro2(frecuencias_terremoto2, abs(tfd_terremoto2), 'Espectro de frecuencias terremoto2')
-graficar_espectro2(frecuencias_terremoto1, abs(calcular_tfd(coeficientes_sfd_terremoto1_suavizado)), 'Espectro de frecuencias filtradas terremoto1')
-graficar_espectro2(frecuencias_terremoto2, abs(calcular_tfd(coeficientes_sfd_terremoto2_suavizado)), 'Espectro de frecuencias filtradas terremoto2')
+graficar_espectro_continuo(frecuencias_terremoto1, tfd_terremoto1, "terremoto 1")
+graficar_espectro_continuo(frecuencias_terremoto2, tfd_terremoto2, "terremoto 2")
