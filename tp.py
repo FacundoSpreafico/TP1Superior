@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.fft as sc
 from scipy.signal import convolve
+from scipy.signal import correlate
 
 '''
 
@@ -45,7 +46,7 @@ from scipy.signal import convolve
 # Función para calcular la TFD a partir de los coeficientes de la SFD
 def calcular_tfd(coeficientes_sfd):
     N = len(coeficientes_sfd)
-    return abs(coeficientes_sfd * N)                 #Calcula la TFD multiplicando los coeficientes de la serie de Fourier por N
+    return coeficientes_sfd * N                 #Calcula la TFD multiplicando los coeficientes de la serie de Fourier por N
 
 # Funcion para calcular los coeficientes de la serie de Fourier de la senal
 def calcular_coeficientes(datos):
@@ -78,6 +79,10 @@ def frecuencias_mas_afectadas(tfd, coeficientes):
     indice_max = np.argmax(coeficientes)
     frecuencia_afectada = tfd[indice_max]
     return np.abs(frecuencia_afectada)
+
+def nivel_de_correlacion(senal1, senal2):
+    aux = correlate(senal1, senal2, mode='full')
+    return aux
 
 def graficar_espectro_continuo(freq, coeficientes, titulo):
     # Graficar el espectro de frecuencias
@@ -122,6 +127,12 @@ def cargar_datos(nombre_archivo):
         datos = [(float(punto[0]), float(punto[1])) for punto in datos]
     return datos
 
+def cargar_datos_terr3(nombre_archivo):
+    with open(nombre_archivo, 'r') as archivo:
+        datos=np.loadtxt(nombre_archivo)
+    return datos
+
+
 #Cargado de datos 2.0 (hace un array de pares (tiempo, aceleracion))
 datos_terremoto1 = cargar_datos('terremoto1.txt')
 datos_terremoto2 = cargar_datos('terremoto2.txt')
@@ -154,30 +165,36 @@ graficar_senal(datos_terremoto2, datos_filtrados2)
 
 #Frecuencia mas afectada
 frecuencias_afectadas1 = frecuencias_mas_afectadas(frecuencias_terremoto1, coeficientes_sfd_terremoto1)
-print("\nLa frecuencia mas afectada en el terremoto1 antes del filtrado fue de ", frecuencias_afectadas1, " Hz")
 
 coeficientes_sfd_terremoto1_suavizado = calcular_coeficientes(datos_filtrados1)
 frecuencias_afectadadas1_suavizadas = frecuencias_mas_afectadas(frecuencias_terremoto1, coeficientes_sfd_terremoto1_suavizado)
-print("\nLa frecuencia mas afectada en el terremoto1 despues del filtrado fue de ", frecuencias_afectadadas1_suavizadas, " Hz")
 
 frecuencias_afectadas2 = frecuencias_mas_afectadas(frecuencias_terremoto2, coeficientes_sfd_terremoto2)
-print("\nLa frecuencia mas afectada en el terremoto2 antes del filtrado fue de ", frecuencias_afectadas2, " Hz")
 
 coeficientes_sfd_terremoto2_suavizado = calcular_coeficientes(datos_filtrados2)
 frecuencias_afectadadas2_suavizadas = frecuencias_mas_afectadas(frecuencias_terremoto2, coeficientes_sfd_terremoto2_suavizado)
+
+print("\nLa frecuencia mas afectada en el terremoto1 antes del filtrado fue de ", frecuencias_afectadas1, " Hz")
+print("\nLa frecuencia mas afectada en el terremoto1 despues del filtrado fue de ", frecuencias_afectadadas1_suavizadas, " Hz")
+print("\nLa frecuencia mas afectada en el terremoto2 antes del filtrado fue de ", frecuencias_afectadas2, " Hz")
 print("\nLa frecuencia mas afectada en el terremoto2 despues del filtrado fue de ", frecuencias_afectadadas2_suavizadas, " Hz")
 
-'''FIJARSE POR QUE DA EL DOBLE PARA EL SEGUNDO TERREMOTO'''
-
-'''
-frecuencias_afectadas2 = frecuencias_mas_afectadas(frecuencias_terremoto2, coeficientes_sfd_terremoto2)
-print("\nLa frecuencia mas afectada en el terremoto2 antes del filtrado fue de ", frecuencias_afectadas2, " Hz")
-'''
 #Graficado de espectro discreto
 #graficar_espectro_discreto(frecuencias_terremoto1, abs(tfd_terremoto1), 'Espectro de frecuencias terremoto1')
 #graficar_espectro_discreto(frecuencias_terremoto2, abs(tfd_terremoto2), 'Espectro de frecuencias terremoto2')
 #graficar_espectro_discreto(frecuencias_terremoto1, abs(calcular_tfd(coeficientes_sfd_terremoto1_suavizado)), 'Espectro de frecuencias filtradas terremoto1')
 #graficar_espectro_discreto(frecuencias_terremoto2, abs(calcular_tfd(coeficientes_sfd_terremoto2_suavizado)), 'Espectro de frecuencias filtradas terremoto2')
-
+#Grafico de espectro continuo (capaz eliminar el semieje negativo de las X y el negativo de las Y)
 graficar_espectro_continuo(frecuencias_terremoto1, tfd_terremoto1, "terremoto 1")
 graficar_espectro_continuo(frecuencias_terremoto2, tfd_terremoto2, "terremoto 2")
+
+datos_terremoto3 = cargar_datos_terr3('terremoto3.txt')
+correlacion_con1 = nivel_de_correlacion([p[1] for p in datos_terremoto1], [p[1] for p in datos_terremoto3])
+correlacion_con2 = nivel_de_correlacion([p[1] for p in datos_terremoto2], [p[1] for p in datos_terremoto3])
+#print(np.max(correlacion_con1), np.max(correlacion_con2))
+
+if(np.max(correlacion_con1) > np.max(correlacion_con2)):
+    print("El detector 3 esta mas proximo al detector 1")
+else:
+    print("El detector 3 esta mas proximo al detector 2")
+
