@@ -74,19 +74,33 @@ def filtrar(datos):
     return datos_suavizados
 
 # Función para determinar las frecuencias más afectadas
-def frecuencias_mas_afectadas(tfd, coeficientes):
+def frecuencias_mas_afectadas(freqs, coeficientes):
     # Encontrar el índice del coeficiente máximo
     indice_max = np.argmax(coeficientes)
-    frecuencia_afectada = tfd[indice_max]
+    indice_min = np.argmin(coeficientes)
+    if(np.abs(coeficientes[indice_max]) > np.abs (coeficientes[indice_min])):
+        frecuencia_afectada = freqs[indice_max]
+    else:
+        frecuencia_afectada = freqs[indice_min]
     return np.abs(frecuencia_afectada)
 
+#Funcion para determinar el nivel de correlacion entre dos senales
 def nivel_de_correlacion(senal1, senal2):
     aux = correlate(senal1, senal2, mode='full')
     return aux
 
+#Funcion que saca la segunda derivada y retorna el valor mayor (mas acelerada)
+def frecuencia_mas_acelerada_derivadas(abscisas, ordenadas):
+    primera_derivada = np.gradient(ordenadas, abscisas)
+    segunda_derivada = np.gradient(primera_derivada, abscisas)
+    graficar_espectro_continuo(abscisas, segunda_derivada, "segunda derivada de frecuencia")
+    return frecuencias_mas_afectadas(abscisas, segunda_derivada)
+
 def graficar_espectro_continuo(freq, coeficientes, titulo):
-    # Graficar el espectro de frecuencias
-    plt.plot(freq, coeficientes)
+    positive_freq = freq[freq >= 0]
+    positive_coef = coeficientes[freq >= 0]
+
+    plt.plot(positive_freq, positive_coef)
     plt.title('Espectro de frecuencias de ' + titulo)
     plt.xlabel('Frecuencia (Hz)')
     plt.ylabel('Amplitud')
@@ -131,7 +145,6 @@ def cargar_datos_terr3(nombre_archivo):
     with open(nombre_archivo, 'r') as archivo:
         datos=np.loadtxt(nombre_archivo)
     return datos
-
 
 #Cargado de datos 2.0 (hace un array de pares (tiempo, aceleracion))
 datos_terremoto1 = cargar_datos('terremoto1.txt')
@@ -191,10 +204,12 @@ graficar_espectro_continuo(frecuencias_terremoto2, tfd_terremoto2, "terremoto 2"
 datos_terremoto3 = cargar_datos_terr3('terremoto3.txt')
 correlacion_con1 = nivel_de_correlacion([p[1] for p in datos_terremoto1], [p[1] for p in datos_terremoto3])
 correlacion_con2 = nivel_de_correlacion([p[1] for p in datos_terremoto2], [p[1] for p in datos_terremoto3])
-#print(np.max(correlacion_con1), np.max(correlacion_con2))
 
 if(np.max(correlacion_con1) > np.max(correlacion_con2)):
     print("El detector 3 esta mas proximo al detector 1")
 else:
     print("El detector 3 esta mas proximo al detector 2")
 
+#la pregunta es, la frecuencia mas acelerada comprende tambien a la desacelerada? porque asi como esta comprende valores negativos
+print("\nLa frecuencia mas acelerada en el terremeto1 fue de ", frecuencia_mas_acelerada_derivadas(frecuencias_terremoto1, coeficientes_sfd_terremoto1_suavizado), " Hz")
+print("\nLa frecuencia mas acelerada en el terremeto2 fue de ", frecuencia_mas_acelerada_derivadas(frecuencias_terremoto2, coeficientes_sfd_terremoto2_suavizado), " Hz")
