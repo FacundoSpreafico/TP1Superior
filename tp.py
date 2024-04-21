@@ -65,7 +65,7 @@ def frecuencias_tfd(frecuencia_muestreo, datos):
 #Funcion para filtrar frecuencias (GPT)
 def filtrar(datos):
     #ventana = np.ones(10)/10            #ventana movil de long 10
-    ventana = np.hanning(100)            #ventana hanning
+    ventana = np.hanning(50)            #ventana hanning
     #ventana = np.hamming(10)            #ventana hamming
     #ventana = np.blackman(10)           #ventana blackman
     y = [p[1] for p in datos]
@@ -78,7 +78,7 @@ def frecuencias_mas_afectadas(freqs, coeficientes):
     # Encontrar el índice del coeficiente máximo
     indice_max = np.argmax(coeficientes)
     indice_min = np.argmin(coeficientes)
-    if(np.abs(coeficientes[indice_max]) > np.abs (coeficientes[indice_min])):
+    if(np.abs(coeficientes[indice_max]) > np.abs(coeficientes[indice_min])):
         frecuencia_afectada = freqs[indice_max]
     else:
         frecuencia_afectada = freqs[indice_min]
@@ -95,6 +95,17 @@ def frecuencia_mas_acelerada_derivadas(abscisas, ordenadas):
     segunda_derivada = np.gradient(primera_derivada, abscisas)
     graficar_espectro_continuo(abscisas, segunda_derivada, "segunda derivada de frecuencia")
     return frecuencias_mas_afectadas(abscisas, segunda_derivada)
+
+def encontrar_pico_mas_alto(datos):
+    # Extraer las ordenadas (aceleración) y abscisas (tiempo) del array de datos
+    ordenadas = [punto[0] for punto in datos]
+    abscisas = [punto[1] for punto in datos]
+    # Encontrar el índice del pico más alto de la señal de aceleración
+    indice_pico = np.argmax(abscisas)
+    # Obtener el tiempo y la aceleración correspondientes al pico más alto
+    tiempo_pico = ordenadas[indice_pico]
+    aceleracion_pico = abscisas[indice_pico]
+    return tiempo_pico, aceleracion_pico, indice_pico
 
 def graficar_espectro_continuo(freq, coeficientes, titulo):
     positive_freq = freq[freq >= 0]
@@ -119,11 +130,9 @@ def graficar_senal(datos, datos_suavizados):
     # Extraer componentes de tiempo y aceleración de los datos originales
     tiempo_datos = [par[0] for par in datos]
     aceleracion_datos = [par[1] for par in datos]
-    
     # Extraer componentes de tiempo y aceleración de los datos suavizados
     tiempo_suavizado = [par[0] for par in datos_suavizados]
     aceleracion_suavizada = [par[1] for par in datos_suavizados]
-
     # Graficar la señal original y la señal suavizada
     plt.figure(figsize=(10, 6))
     plt.plot(tiempo_datos, aceleracion_datos, label='Señal original')
@@ -192,12 +201,6 @@ print("\nLa frecuencia mas afectada en el terremoto1 despues del filtrado fue de
 print("\nLa frecuencia mas afectada en el terremoto2 antes del filtrado fue de ", frecuencias_afectadas2, " Hz")
 print("\nLa frecuencia mas afectada en el terremoto2 despues del filtrado fue de ", frecuencias_afectadadas2_suavizadas, " Hz")
 
-#Graficado de espectro discreto
-#graficar_espectro_discreto(frecuencias_terremoto1, abs(tfd_terremoto1), 'Espectro de frecuencias terremoto1')
-#graficar_espectro_discreto(frecuencias_terremoto2, abs(tfd_terremoto2), 'Espectro de frecuencias terremoto2')
-#graficar_espectro_discreto(frecuencias_terremoto1, abs(calcular_tfd(coeficientes_sfd_terremoto1_suavizado)), 'Espectro de frecuencias filtradas terremoto1')
-#graficar_espectro_discreto(frecuencias_terremoto2, abs(calcular_tfd(coeficientes_sfd_terremoto2_suavizado)), 'Espectro de frecuencias filtradas terremoto2')
-#Grafico de espectro continuo (capaz eliminar el semieje negativo de las X y el negativo de las Y)
 graficar_espectro_continuo(frecuencias_terremoto1, tfd_terremoto1, "terremoto 1")
 graficar_espectro_continuo(frecuencias_terremoto2, tfd_terremoto2, "terremoto 2")
 
@@ -213,3 +216,6 @@ else:
 #la pregunta es, la frecuencia mas acelerada comprende tambien a la desacelerada? porque asi como esta comprende valores negativos
 print("\nLa frecuencia mas acelerada en el terremeto1 fue de ", frecuencia_mas_acelerada_derivadas(frecuencias_terremoto1, coeficientes_sfd_terremoto1_suavizado), " Hz")
 print("\nLa frecuencia mas acelerada en el terremeto2 fue de ", frecuencia_mas_acelerada_derivadas(frecuencias_terremoto2, coeficientes_sfd_terremoto2_suavizado), " Hz")
+
+print("\nEl punto que mas se acelero en el terremoto1: ", encontrar_pico_mas_alto(datos_filtrados1))
+print("\nEl punto que mas se acelero en el terremoto2: ", encontrar_pico_mas_alto(datos_filtrados2))
