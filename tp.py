@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.fft as sc
 from scipy.signal import convolve
+from scipy.signal import convolve2d
 from scipy.signal import correlate
 from scipy.interpolate import interp1d
 
@@ -13,6 +14,7 @@ def calcular_tfd(coeficientes_sfd):
 # Funcion para calcular los coeficientes de la serie de Fourier de la senal
 def calcular_coeficientes(datos):
     N = len(datos)                              #Calcula la cantidad de entradas dentro del archivo
+    print("\nLargo de los datos: ", N)
     n = np.arange(N)                            #Hace un arreglo con valores desde 0 a N-1
     k = n.reshape((N, 1))                       #Hace el arreglo n como un vector columna
     M = np.exp(-2j * np.pi * k * n / N)         #Calcula el numero exponencial que tendra que ser multiplicado por la entrada x[n] (Datos)
@@ -54,7 +56,7 @@ def acortar_terr2(datos):
     for i in range(len(datos)):
         if(i % 2 == 0):
             res.append(datos[i])
-    print(len(res))
+    #print(len(res))
     return res
 
 def prod_punto_tfd(tfd1, tfd2):
@@ -130,6 +132,18 @@ def graficar_senal(datos, datos_suavizados):
     plt.plot(tiempo_datos, aceleracion_datos, label='Señal original')
     plt.plot(tiempo_suavizado, aceleracion_suavizada, label='Señal filtrada')
     plt.title('Filtrado de altas frecuencias')
+    plt.xlabel('Tiempo')
+    plt.ylabel('Aceleracion')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
+def graficar_senal_singular(datos, tiempo):
+    # Extraer componentes de tiempo y aceleración de los datos originales
+    # Graficar la señal original y la señal suavizada
+    plt.figure(figsize=(10, 6))
+    plt.plot(tiempo, datos, label='Señal original')
+    plt.title('Convolucion de ambas senales')
     plt.xlabel('Tiempo')
     plt.ylabel('Aceleracion')
     plt.grid(True)
@@ -217,7 +231,7 @@ print("\nEl punto que mas se acelero en el terremoto1: ", encontrar_pico_mas_alt
 print("\nEl punto que mas se acelero en el terremoto2: ", encontrar_pico_mas_alto(datos_filtrados2))
 '''
 
-
+#Primera solucion freq mas acelerada
 tfd_terremoto1_suavizados = calcular_tfd(coeficientes_sfd_terremoto1_suavizado)
 datos_filtrados2_acortados= acortar_terr2(datos_filtrados2)
 tfd_terremoto2_suavizados_acortado = calcular_tfd(calcular_coeficientes(datos_filtrados2_acortados))
@@ -228,5 +242,21 @@ resultado_prod_punto_tfd = prod_punto_tfd(tfd_terremoto1_suavizados, tfd_terremo
 
 graficar_espectro_continuo(frecuencias_terremoto1, resultado_prod_punto_tfd, "Espectro de frecuencias de prod punto de tfds")
 
-maximo = frecuencias_mas_afectadas(frecuencias_terremoto1, resultado_prod_punto_tfd)
-print("\nLa frecuencia mas acelerada de ambas senales es de: ", maximo, " Hz")
+maximo_1 = frecuencias_mas_afectadas(frecuencias_terremoto1, resultado_prod_punto_tfd)
+print("\nLa frecuencia mas acelerada de ambas senales es de: ", maximo_1, " Hz en la primera solucion")
+
+#Segunda solucion freq mas acelerada
+convolucion_senales = np.convolve([p[1] for p in datos_filtrados2_acortados], [p[1] for p in datos_filtrados1], mode='same')
+#convolucion_senales = np.concatenate(([0], convolucion_senales))
+tiempo_convolucion = np.arange(len(convolucion_senales)) / 100
+datos_convolucion = list(zip(tiempo_convolucion, convolucion_senales))
+graficar_senal_singular(convolucion_senales, tiempo_convolucion)
+
+coeficientes_sfd_convolucion = calcular_coeficientes(datos_convolucion)
+#print("\nArreglo de coeficientes: ", coeficientes_sfd_convolucion)
+#print("\nLong de arreglo de coeficientes: ", len(coeficientes_sfd_convolucion))
+tfd_convolucion = calcular_tfd(coeficientes_sfd_convolucion)
+graficar_espectro_continuo(frecuencias_terremoto1, tfd_convolucion, "Espectro de la convolucion de senales")
+
+maximo_2 = frecuencias_mas_afectadas(frecuencias_terremoto1, tfd_convolucion)
+print("\nLa frecuencia mas acelerada de ambas senales es de: ", maximo_2, " Hz en la segunda solucion")
