@@ -54,7 +54,7 @@ def calcular_coeficientes(datos):
     n = np.arange(N)                            #Hace un arreglo con valores desde 0 a N-1
     k = n.reshape((N, 1))                       #Hace el arreglo n como un vector columna
     M = np.exp(-2j * np.pi * k * n / N)         #Calcula el numero exponencial que tendra que ser multiplicado por la entrada x[n] (Datos)
-    return np.dot(M, [dato[1] for dato in datos]) / N
+    return np.dot(M, [dato[1] for dato in datos]) * (2/N)
 
 #Funcion para sacar las frecuencias de la TFD
 def frecuencias_tfd(frecuencia_muestreo, datos):
@@ -62,20 +62,21 @@ def frecuencias_tfd(frecuencia_muestreo, datos):
     frecuencias = np.fft.fftfreq(N, 1/frecuencia_muestreo)
     return frecuencias
 
-#Funcion para filtrar frecuencias (GPT)
+#ventana = np.ones(10)/10            #ventana movil de long 10
+#ventana = np.hamming(10)            #ventana hamming
+#ventana = np.blackman(10)           #ventana blackman
+
+#Funcion que filtra frecuencias. convolucion con hanning
 def filtrar(datos):
-    #ventana = np.ones(10)/10            #ventana movil de long 10
     ventana = np.hanning(50)            #ventana hanning
-    #ventana = np.hamming(10)            #ventana hamming
-    #ventana = np.blackman(10)           #ventana blackman
     y = [p[1] for p in datos]
     y_suavizado = convolve(y, ventana, mode='same') / sum(ventana)
     datos_suavizados = [(datos[i][0], y_suavizado[i]) for i in range(len(datos))]
     return datos_suavizados
 
-# Función para determinar las frecuencias más afectadas
+#Funcion para determinar las frecuencias más afectadas
 def frecuencias_mas_afectadas(freqs, coeficientes):
-    # Encontrar el índice del coeficiente máximo
+    #primero hay que encontrar el indice maximo
     indice_max = np.argmax(coeficientes)
     indice_min = np.argmin(coeficientes)
     if(np.abs(coeficientes[indice_max]) > np.abs(coeficientes[indice_min])):
@@ -110,6 +111,7 @@ def encontrar_pico_mas_alto(datos):
 def graficar_espectro_continuo(freq, coeficientes, titulo):
     positive_freq = freq[freq >= 0]
     positive_coef = coeficientes[freq >= 0]
+    positive_coef = np.abs(positive_coef)
 
     plt.plot(positive_freq, positive_coef)
     plt.title('Espectro de frecuencias de ' + titulo)
@@ -201,8 +203,11 @@ print("\nLa frecuencia mas afectada en el terremoto1 despues del filtrado fue de
 print("\nLa frecuencia mas afectada en el terremoto2 antes del filtrado fue de ", frecuencias_afectadas2, " Hz")
 print("\nLa frecuencia mas afectada en el terremoto2 despues del filtrado fue de ", frecuencias_afectadadas2_suavizadas, " Hz")
 
+#graficado de los coeficientes de la serie de Fourier
 graficar_espectro_continuo(frecuencias_terremoto1, tfd_terremoto1, "terremoto 1")
 graficar_espectro_continuo(frecuencias_terremoto2, tfd_terremoto2, "terremoto 2")
+graficar_espectro_continuo(frecuencias_terremoto1, calcular_tfd(coeficientes_sfd_terremoto1_suavizado), "terremoto 1")
+graficar_espectro_continuo(frecuencias_terremoto2, calcular_tfd(coeficientes_sfd_terremoto2_suavizado), "terremoto 2")
 
 datos_terremoto3 = cargar_datos_terr3('terremoto3.txt')
 correlacion_con1 = nivel_de_correlacion([p[1] for p in datos_terremoto1], [p[1] for p in datos_terremoto3])
