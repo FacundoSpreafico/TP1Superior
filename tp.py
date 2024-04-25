@@ -48,25 +48,17 @@ def nivel_de_correlacion(senal1, senal2):
     aux = correlate(senal1, senal2, mode='full')
     return aux
 
+#Funcion para acortar el terremoto 2 a 4000 puntos
 def acortar_terr2(datos):
-    vector_indices = np.arange(0, 40.0, 0.005)
-    nuevos_datos = [datos for vector_indice in vector_indices if vector_indice % 0.01 == 0]
-    print(len(nuevos_datos))
-    return nuevos_datos
+    res = []
+    for i in range(len(datos)):
+        if(i % 2 == 0):
+            res.append(datos[i])
+    print(len(res))
+    return res
 
-def interpolacion(funcion1):
-    interpolados = []
-    for i in range(0, len(funcion1)-1):
-        interpolados.append(funcion1[i])
-        interpolados.append((funcion1[i] + funcion1[i+1])/2)
-    interpolados.append(funcion1[len(funcion1)-1])
-    interpolados.append(0)
-    #print(len(interpolados))
-    return interpolados
-
-def interpolacion2(TRANSFORMADATERREMOTO1, freq):
-    vector_interpolado = np.interp(np.arange(0, 8000, 1), freq, TRANSFORMADATERREMOTO1)
-    return vector_interpolado
+def prod_punto_tfd(tfd1, tfd2):
+    return tfd1 * tfd2
 
 '''SOLUCION VIEJA
 #Funcion que saca la segunda derivada y retorna el valor mayor (mas acelerada)
@@ -225,7 +217,16 @@ print("\nEl punto que mas se acelero en el terremoto1: ", encontrar_pico_mas_alt
 print("\nEl punto que mas se acelero en el terremoto2: ", encontrar_pico_mas_alto(datos_filtrados2))
 '''
 
-#graficar_espectros_interpolados(frecuencias_terremoto1, tfd_terremoto1, "hola", frecuencias_terremoto2, interpolacion2(tfd_terremoto1, frecuencias_terremoto1), "hola2")
 
-aux = acortar_terr2(datos_terremoto2)
-graficar_senal(aux, datos_terremoto2)
+tfd_terremoto1_suavizados = calcular_tfd(coeficientes_sfd_terremoto1_suavizado)
+datos_filtrados2_acortados= acortar_terr2(datos_filtrados2)
+tfd_terremoto2_suavizados_acortado = calcular_tfd(calcular_coeficientes(datos_filtrados2_acortados))
+
+#graficar_senal(aux, datos_filtrados2)
+
+resultado_prod_punto_tfd = prod_punto_tfd(tfd_terremoto1_suavizados, tfd_terremoto2_suavizados_acortado)
+
+graficar_espectro_continuo(frecuencias_terremoto1, resultado_prod_punto_tfd, "Espectro de frecuencias de prod punto de tfds")
+
+maximo = frecuencias_mas_afectadas(frecuencias_terremoto1, resultado_prod_punto_tfd)
+print("\nLa frecuencia mas acelerada de ambas senales es de: ", maximo, " Hz")
