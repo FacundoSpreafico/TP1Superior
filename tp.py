@@ -3,45 +3,7 @@ import matplotlib.pyplot as plt
 import scipy.fft as sc
 from scipy.signal import convolve
 from scipy.signal import correlate
-
-'''
-
-⢸⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⡷⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠢⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠈⠑⢦⡀⠀⠀⠀⠀⠀
-⢸⠀⠀⠀⠀⢀⠖⠒⠒⠒⢤⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠙⢦⡀⠀⠀⠀⠀
-⢸⠀⠀⣀⢤⣼⣀⡠⠤⠤⠼⠤⡄⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠙⢄⠀⠀⠀⠀
-⢸⠀⠀⠑⡤⠤⡒⠒⠒⡊⠙⡏⠀⢀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠑⠢⡄⠀
-⢸⠀⠀⠀⠇⠀⣀⣀⣀⣀⢀⠧⠟⠁⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀
-⢸⠀⠀⠀⠸⣀⠀⠀⠈⢉⠟⠓⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
-⢸⠀⠀⠀⠀⠈⢱⡖⠋⠁⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
-⢸⠀⠀⠀⠀⣠⢺⠧⢄⣀⠀⠀⣀⣀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
-⢸⠀⠀⠀⣠⠃⢸⠀⠀⠈⠉⡽⠿⠯⡆⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
-⢸⠀⠀⣰⠁⠀⢸⠀⠀⠀⠀⠉⠉⠉⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
-⢸⠀⠀⠣⠀⠀⢸⢄⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
-⢸⠀⠀⠀⠀⠀⢸⠀⢇⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
-⢸⠀⠀⠀⠀⠀⡌⠀⠈⡆⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
-⢸⠀⠀⠀⠀⢠⠃⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
-⢸⠀⠀⠀⠀⢸⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠷      are you winning son?
-
-    .       ⣀⣠⣤⠶⠦⠤⣤⣤⣤⣀⡀⠀⠀⠀⠀⠀⠀ ⠀⠀
-⠀⠀    ⠀⢀⣤⠾⠋⠁⠁⠀⠀⠀⠀⠀⠀⠀⠈⠙⢦⡀⠀⠀⠀⠀ 
-⠀⠀⠀⠀⣰⠟⠁⠀⠀⠀⠀⠀⠀⠀⣀⢀⠀⠀⠀⠀⠀⠙⢦⠀⠀⠀
- ⠀⠀⢀⡼⠃⠀⠀⠀⢀⣤⣴⣴⣾⣿⣿⣷⣷⣦⡀⠀⠀⠀⠸⣇⠀⠀
- ⠀⢀⡞⠁⠀⣠⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠄⠀⠀⠀⢹⠀
-⠀ ⣴⠋⠀⠀⣰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠃⠀⠀⠀⠀⢸⡄
-⠀ ⣿⠀⠀⠀⣾⠋⣉⣉⡉⠙⢻⣿⣿⡏⠉⣠⡤⠤⡄⠀⠀⠀⠀⠘⡇
-⠀ ⠙⣯⠁⠄⣿⣿⠁⢉⠉⣒⣬⣿⡟⢁⣪⣍⣁⡀⣐⣾⠀⠀⠀⠰⠇
-⠀ ⠰⣿⣶⡇⢿⣿⣿⣿⣿⣿⣿⣿⡷⢘⣿⣿⣿⣿⣿⣿⠀⠀⠳⣳⠀
-⠀ ⠠⠯⣼⣿⢸⣿⣿⣿⣿⣿⣿⣿⣷⡌⡿⢿⣿⣿⣿⠇⠀⠈⠠⡁⠀
- ⠀⠀⠈⠿⢸⣿⣿⣿⣿⠯⠉⠛⠛⠁⠀⠺⠿⢿⣿⢸⡆⠀⠀⠀⠀⠀ 
-⠀      ⣿⣿⣍⣌⣬⣿⣿⣿⣭⣭⡤⣠⣤⣿⣼⡇⠀⠀⠀⠀⠀ 
-        ⣿⣿⣿⣿⣯⣿⣿⣿⣿⣧⣶⣿⣿⢳⡟⠀⠀⠀⠀⠀⠀ 
-        ⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠇⠏⠀⠀⠀⠀⠀⠀⠀ 
-          ⠈⠻⣿⣿⣿⣿⣿⣿⣿⠁⠀⠀⢀⡀⠀⢀⣀⣀⠀
- ⠀⣀⣤⣤⣤⣴⣇⢰⣶⣤⣉⠙⠁⠋⠉⠀⠀⢀⣤⣾⣧⣠⣼⣿⣿⣮
- ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣶⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿  yes
-'''
+from scipy.interpolate import interp1d
 
 # Función para calcular la TFD a partir de los coeficientes de la SFD
 def calcular_tfd(coeficientes_sfd):
@@ -61,10 +23,6 @@ def frecuencias_tfd(frecuencia_muestreo, datos):
     N=len(datos)
     frecuencias = np.fft.fftfreq(N, 1/frecuencia_muestreo)
     return frecuencias
-
-#ventana = np.ones(10)/10            #ventana movil de long 10
-#ventana = np.hamming(10)            #ventana hamming
-#ventana = np.blackman(10)           #ventana blackman
 
 #Funcion que filtra frecuencias. convolucion con hanning
 def filtrar(datos):
@@ -90,6 +48,27 @@ def nivel_de_correlacion(senal1, senal2):
     aux = correlate(senal1, senal2, mode='full')
     return aux
 
+def acortar_terr2(datos):
+    vector_indices = np.arange(0, 40.0, 0.005)
+    nuevos_datos = [datos for vector_indice in vector_indices if vector_indice % 0.01 == 0]
+    print(len(nuevos_datos))
+    return nuevos_datos
+
+def interpolacion(funcion1):
+    interpolados = []
+    for i in range(0, len(funcion1)-1):
+        interpolados.append(funcion1[i])
+        interpolados.append((funcion1[i] + funcion1[i+1])/2)
+    interpolados.append(funcion1[len(funcion1)-1])
+    interpolados.append(0)
+    #print(len(interpolados))
+    return interpolados
+
+def interpolacion2(TRANSFORMADATERREMOTO1, freq):
+    vector_interpolado = np.interp(np.arange(0, 8000, 1), freq, TRANSFORMADATERREMOTO1)
+    return vector_interpolado
+
+'''SOLUCION VIEJA
 #Funcion que saca la segunda derivada y retorna el valor mayor (mas acelerada)
 def frecuencia_mas_acelerada_derivadas(abscisas, ordenadas):
     primera_derivada = np.gradient(ordenadas, abscisas)
@@ -107,6 +86,7 @@ def encontrar_pico_mas_alto(datos):
     tiempo_pico = ordenadas[indice_pico]
     aceleracion_pico = abscisas[indice_pico]
     return tiempo_pico, aceleracion_pico, indice_pico
+'''
 
 def graficar_espectro_continuo(freq, coeficientes, titulo):
     positive_freq = freq[freq >= 0]
@@ -117,6 +97,24 @@ def graficar_espectro_continuo(freq, coeficientes, titulo):
     plt.title('Espectro de frecuencias de ' + titulo)
     plt.xlabel('Frecuencia (Hz)')
     plt.ylabel('Amplitud')
+    plt.tight_layout()
+    plt.show()
+
+def graficar_espectros_interpolados(freq, coeficientes, titulo, freq2, coeficientes2, titulo2):
+    positive_freq = freq[freq >= 0]
+    positive_coef = coeficientes[freq >= 0]
+    positive_coef = np.abs(positive_coef)
+
+    positive_freq2 = freq2[freq2 >= 0]
+    positive_coef2 = coeficientes2[freq2 >= 0]
+    positive_coef2 = np.abs(positive_coef2)
+
+    aux1, aux2 = plt.subplots(1,2)
+    aux2[0].plot(positive_freq, positive_coef)
+    aux2[0].set_title(titulo)
+    aux2[1].plot(positive_freq2, positive_coef2)
+    aux2[1].set_title(titulo2)
+
     plt.tight_layout()
     plt.show()
 
@@ -183,9 +181,9 @@ print("\nFrecuencias para terremoto2: ", tfd_terremoto2)
 
 # Suavizar las altas frecuencias de los terremotos y graficarlo
 datos_filtrados1 = filtrar(datos_terremoto1)
-graficar_senal(datos_terremoto1, datos_filtrados1)
+#graficar_senal(datos_terremoto1, datos_filtrados1)
 datos_filtrados2 = filtrar(datos_terremoto2)
-graficar_senal(datos_terremoto2, datos_filtrados2)
+#graficar_senal(datos_terremoto2, datos_filtrados2)
 
 #Frecuencia mas afectada
 frecuencias_afectadas1 = frecuencias_mas_afectadas(frecuencias_terremoto1, coeficientes_sfd_terremoto1)
@@ -203,11 +201,11 @@ print("\nLa frecuencia mas afectada en el terremoto1 despues del filtrado fue de
 print("\nLa frecuencia mas afectada en el terremoto2 antes del filtrado fue de ", frecuencias_afectadas2, " Hz")
 print("\nLa frecuencia mas afectada en el terremoto2 despues del filtrado fue de ", frecuencias_afectadadas2_suavizadas, " Hz")
 
-#graficado de los coeficientes de la serie de Fourier
-graficar_espectro_continuo(frecuencias_terremoto1, tfd_terremoto1, "terremoto 1")
-graficar_espectro_continuo(frecuencias_terremoto2, tfd_terremoto2, "terremoto 2")
-graficar_espectro_continuo(frecuencias_terremoto1, calcular_tfd(coeficientes_sfd_terremoto1_suavizado), "terremoto 1")
-graficar_espectro_continuo(frecuencias_terremoto2, calcular_tfd(coeficientes_sfd_terremoto2_suavizado), "terremoto 2")
+#graficado de la transformada
+#graficar_espectro_continuo(frecuencias_terremoto1, tfd_terremoto1, "terremoto 1")
+#graficar_espectro_continuo(frecuencias_terremoto2, tfd_terremoto2, "terremoto 2")
+#graficar_espectro_continuo(frecuencias_terremoto1, calcular_tfd(coeficientes_sfd_terremoto1_suavizado), "terremoto 1")
+#graficar_espectro_continuo(frecuencias_terremoto2, calcular_tfd(coeficientes_sfd_terremoto2_suavizado), "terremoto 2")
 
 datos_terremoto3 = cargar_datos_terr3('terremoto3.txt')
 correlacion_con1 = nivel_de_correlacion([p[1] for p in datos_terremoto1], [p[1] for p in datos_terremoto3])
@@ -218,9 +216,16 @@ if(np.max(correlacion_con1) > np.max(correlacion_con2)):
 else:
     print("El detector 3 esta mas proximo al detector 2")
 
+''' SOLUCION VIEJA
 #la pregunta es, la frecuencia mas acelerada comprende tambien a la desacelerada? porque asi como esta comprende valores negativos
 print("\nLa frecuencia mas acelerada en el terremeto1 fue de ", frecuencia_mas_acelerada_derivadas(frecuencias_terremoto1, coeficientes_sfd_terremoto1_suavizado), " Hz")
 print("\nLa frecuencia mas acelerada en el terremeto2 fue de ", frecuencia_mas_acelerada_derivadas(frecuencias_terremoto2, coeficientes_sfd_terremoto2_suavizado), " Hz")
 
 print("\nEl punto que mas se acelero en el terremoto1: ", encontrar_pico_mas_alto(datos_filtrados1))
 print("\nEl punto que mas se acelero en el terremoto2: ", encontrar_pico_mas_alto(datos_filtrados2))
+'''
+
+#graficar_espectros_interpolados(frecuencias_terremoto1, tfd_terremoto1, "hola", frecuencias_terremoto2, interpolacion2(tfd_terremoto1, frecuencias_terremoto1), "hola2")
+
+aux = acortar_terr2(datos_terremoto2)
+graficar_senal(aux, datos_terremoto2)
