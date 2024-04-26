@@ -14,7 +14,7 @@ def calcular_tfd(coeficientes_sfd):
 # Funcion para calcular los coeficientes de la serie de Fourier de la senal
 def calcular_coeficientes(datos):
     N = len(datos)                              #Calcula la cantidad de entradas dentro del archivo
-    print("\nLargo de los datos: ", N)
+    #print("\nLargo de los datos: ", N)
     n = np.arange(N)                            #Hace un arreglo con valores desde 0 a N-1
     k = n.reshape((N, 1))                       #Hace el arreglo n como un vector columna
     M = np.exp(-2j * np.pi * k * n / N)         #Calcula el numero exponencial que tendra que ser multiplicado por la entrada x[n] (Datos)
@@ -34,17 +34,6 @@ def filtrar(datos):
     datos_suavizados = [(datos[i][0], y_suavizado[i]) for i in range(len(datos))]
     return datos_suavizados
 
-#Funcion para determinar las frecuencias más afectadas
-def frecuencias_mas_afectadas(freqs, coeficientes):
-    #primero hay que encontrar el indice maximo
-    indice_max = np.argmax(coeficientes)
-    indice_min = np.argmin(coeficientes)
-    if(np.abs(coeficientes[indice_max]) > np.abs(coeficientes[indice_min])):
-        frecuencia_afectada = freqs[indice_max]
-    else:
-        frecuencia_afectada = freqs[indice_min]
-    return np.abs(frecuencia_afectada)
-
 #Funcion para determinar el nivel de correlacion entre dos senales
 def nivel_de_correlacion(senal1, senal2):
     aux = correlate(senal1, senal2, mode='full')
@@ -59,28 +48,15 @@ def acortar_terr2(datos):
     #print(len(res))
     return res
 
-def prod_punto_tfd(tfd1, tfd2):
-    return tfd1 * tfd2
+#Encuentra la freq maxima para una lista de coeficientes dados
+def freq_max(freqs, coef):
+    coef = abs(coef)
+    indice = np.argmax(coef)
+    return np.abs(freqs[indice])
 
-'''SOLUCION VIEJA
-#Funcion que saca la segunda derivada y retorna el valor mayor (mas acelerada)
-def frecuencia_mas_acelerada_derivadas(abscisas, ordenadas):
-    primera_derivada = np.gradient(ordenadas, abscisas)
-    segunda_derivada = np.gradient(primera_derivada, abscisas)
-    graficar_espectro_continuo(abscisas, segunda_derivada, "segunda derivada de frecuencia")
-    return frecuencias_mas_afectadas(abscisas, segunda_derivada)
-
-def encontrar_pico_mas_alto(datos):
-    # Extraer las ordenadas (aceleración) y abscisas (tiempo) del array de datos
-    ordenadas = [punto[0] for punto in datos]
-    abscisas = [punto[1] for punto in datos]
-    # Encontrar el índice del pico más alto de la señal de aceleración
-    indice_pico = np.argmax(abscisas)
-    # Obtener el tiempo y la aceleración correspondientes al pico más alto
-    tiempo_pico = ordenadas[indice_pico]
-    aceleracion_pico = abscisas[indice_pico]
-    return tiempo_pico, aceleracion_pico, indice_pico
-'''
+#suma termino a termino dos tfds
+def suma_tfd(tfd1, tfd2):
+    return tfd1 + tfd2
 
 def graficar_espectro_continuo(freq, coeficientes, titulo):
     positive_freq = freq[freq >= 0]
@@ -112,14 +88,6 @@ def graficar_espectros_interpolados(freq, coeficientes, titulo, freq2, coeficien
     plt.tight_layout()
     plt.show()
 
-def graficar_espectro_discreto(frecuencias, magnitudes, titulo, paso=20):
-    plt.stem(frecuencias[::paso], magnitudes[::paso], linefmt='b-', markerfmt='bo', basefmt='k-')
-    plt.title(titulo)
-    plt.xlabel('Frecuencia (Hz)')
-    plt.ylabel('Magnitud')
-    plt.grid(True)
-    plt.show()
-
 def graficar_senal(datos, datos_suavizados):
     # Extraer componentes de tiempo y aceleración de los datos originales
     tiempo_datos = [par[0] for par in datos]
@@ -143,7 +111,6 @@ def graficar_senal_singular(datos, tiempo):
     # Graficar la señal original y la señal suavizada
     plt.figure(figsize=(10, 6))
     plt.plot(tiempo, datos, label='Señal original')
-    plt.title('Convolucion de ambas senales')
     plt.xlabel('Tiempo')
     plt.ylabel('Aceleracion')
     plt.grid(True)
@@ -192,15 +159,15 @@ datos_filtrados2 = filtrar(datos_terremoto2)
 #graficar_senal(datos_terremoto2, datos_filtrados2)
 
 #Frecuencia mas afectada
-frecuencias_afectadas1 = frecuencias_mas_afectadas(frecuencias_terremoto1, coeficientes_sfd_terremoto1)
+frecuencias_afectadas1 = freq_max(frecuencias_terremoto1, coeficientes_sfd_terremoto1)
 
 coeficientes_sfd_terremoto1_suavizado = calcular_coeficientes(datos_filtrados1)
-frecuencias_afectadadas1_suavizadas = frecuencias_mas_afectadas(frecuencias_terremoto1, coeficientes_sfd_terremoto1_suavizado)
+frecuencias_afectadadas1_suavizadas = freq_max(frecuencias_terremoto1, coeficientes_sfd_terremoto1_suavizado)
 
-frecuencias_afectadas2 = frecuencias_mas_afectadas(frecuencias_terremoto2, coeficientes_sfd_terremoto2)
+frecuencias_afectadas2 = freq_max(frecuencias_terremoto2, coeficientes_sfd_terremoto2)
 
 coeficientes_sfd_terremoto2_suavizado = calcular_coeficientes(datos_filtrados2)
-frecuencias_afectadadas2_suavizadas = frecuencias_mas_afectadas(frecuencias_terremoto2, coeficientes_sfd_terremoto2_suavizado)
+frecuencias_afectadadas2_suavizadas = freq_max(frecuencias_terremoto2, coeficientes_sfd_terremoto2_suavizado)
 
 print("\nLa frecuencia mas afectada en el terremoto1 antes del filtrado fue de ", frecuencias_afectadas1, " Hz")
 print("\nLa frecuencia mas afectada en el terremoto1 despues del filtrado fue de ", frecuencias_afectadadas1_suavizadas, " Hz")
@@ -218,34 +185,53 @@ correlacion_con1 = nivel_de_correlacion([p[1] for p in datos_terremoto1], [p[1] 
 correlacion_con2 = nivel_de_correlacion([p[1] for p in datos_terremoto2], [p[1] for p in datos_terremoto3])
 
 if(np.max(correlacion_con1) > np.max(correlacion_con2)):
-    print("El detector 3 esta mas proximo al detector 1")
+    print("\nEl detector 3 esta mas proximo al detector 1")
 else:
-    print("El detector 3 esta mas proximo al detector 2")
+    print("\nEl detector 3 esta mas proximo al detector 2")
 
-''' SOLUCION VIEJA
-#la pregunta es, la frecuencia mas acelerada comprende tambien a la desacelerada? porque asi como esta comprende valores negativos
-print("\nLa frecuencia mas acelerada en el terremeto1 fue de ", frecuencia_mas_acelerada_derivadas(frecuencias_terremoto1, coeficientes_sfd_terremoto1_suavizado), " Hz")
-print("\nLa frecuencia mas acelerada en el terremeto2 fue de ", frecuencia_mas_acelerada_derivadas(frecuencias_terremoto2, coeficientes_sfd_terremoto2_suavizado), " Hz")
-
-print("\nEl punto que mas se acelero en el terremoto1: ", encontrar_pico_mas_alto(datos_filtrados1))
-print("\nEl punto que mas se acelero en el terremoto2: ", encontrar_pico_mas_alto(datos_filtrados2))
-'''
-
-#Primera solucion freq mas acelerada
+#Primera solucion freq mas acelerada (SUMAS)
 tfd_terremoto1_suavizados = calcular_tfd(coeficientes_sfd_terremoto1_suavizado)
 datos_filtrados2_acortados= acortar_terr2(datos_filtrados2)
 tfd_terremoto2_suavizados_acortado = calcular_tfd(calcular_coeficientes(datos_filtrados2_acortados))
 
 #graficar_senal(aux, datos_filtrados2)
 
-resultado_prod_punto_tfd = prod_punto_tfd(tfd_terremoto1_suavizados, tfd_terremoto2_suavizados_acortado)
+resultado_suma_tfd = suma_tfd(tfd_terremoto1_suavizados, tfd_terremoto2_suavizados_acortado)
+
+graficar_espectro_continuo(frecuencias_terremoto1, resultado_suma_tfd, "Espectro de frecuencias de suma de tfds")
+
+maximo_1 = freq_max(frecuencias_terremoto1, resultado_suma_tfd)
+print("\nLa frecuencia mas acelerada de ambas senales es de: ", maximo_1, " Hz en la primera solucion")
+
+#Segunda solucion freq mas acelerada (SUMAS)
+suma_senales = []
+for i in range(len(datos_filtrados1)):
+    suma_senales.append(datos_filtrados1[i][1] + datos_filtrados2_acortados[i][1])
+
+tiempo_suma = np.arange(len(suma_senales)) / 100
+datos_suma = list(zip(tiempo_suma, suma_senales))
+graficar_senal_singular(suma_senales, tiempo_suma)
+
+coeficientes_sfd_suma = calcular_coeficientes(datos_suma)
+#print("\nArreglo de coeficientes: ", coeficientes_sfd_convolucion)
+#print("\nLong de arreglo de coeficientes: ", len(coeficientes_sfd_convolucion))
+tfd_suma = calcular_tfd(coeficientes_sfd_suma)
+graficar_espectro_continuo(frecuencias_terremoto1, tfd_suma, "Espectro de la suma de senales")
+
+maximo_2 = freq_max(frecuencias_terremoto1, tfd_suma)
+print("\nLa frecuencia mas acelerada de ambas senales es de: ", maximo_2, " Hz en la segunda solucion")
+
+'''
+#Primera solucion freq mas acelerada PRODUCTO
+tfd_terremoto1_suavizados = calcular_tfd(coeficientes_sfd_terremoto1_suavizado)
+datos_filtrados2_acortados= acortar_terr2(datos_filtrados2)
+tfd_terremoto2_suavizados_acortado = calcular_tfd(calcular_coeficientes(datos_filtrados2_acortados))
 
 graficar_espectro_continuo(frecuencias_terremoto1, resultado_prod_punto_tfd, "Espectro de frecuencias de prod punto de tfds")
-
 maximo_1 = frecuencias_mas_afectadas(frecuencias_terremoto1, resultado_prod_punto_tfd)
 print("\nLa frecuencia mas acelerada de ambas senales es de: ", maximo_1, " Hz en la primera solucion")
 
-#Segunda solucion freq mas acelerada
+#Segunda solucion freq mas acelerada PRODUCTO
 convolucion_senales = np.convolve([p[1] for p in datos_filtrados2_acortados], [p[1] for p in datos_filtrados1], mode='same')
 #convolucion_senales = np.concatenate(([0], convolucion_senales))
 tiempo_convolucion = np.arange(len(convolucion_senales)) / 100
@@ -260,3 +246,4 @@ graficar_espectro_continuo(frecuencias_terremoto1, tfd_convolucion, "Espectro de
 
 maximo_2 = frecuencias_mas_afectadas(frecuencias_terremoto1, tfd_convolucion)
 print("\nLa frecuencia mas acelerada de ambas senales es de: ", maximo_2, " Hz en la segunda solucion")
+'''
