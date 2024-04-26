@@ -72,24 +72,6 @@ def graficar_espectro_continuo(freq, coeficientes, titulo):
     plt.tight_layout()
     plt.show()
 
-def graficar_espectros_interpolados(freq, coeficientes, titulo, freq2, coeficientes2, titulo2):
-    positive_freq = freq[freq >= 0]
-    positive_coef = coeficientes[freq >= 0]
-    positive_coef = np.abs(positive_coef)
-
-    positive_freq2 = freq2[freq2 >= 0]
-    positive_coef2 = coeficientes2[freq2 >= 0]
-    positive_coef2 = np.abs(positive_coef2)
-
-    aux1, aux2 = plt.subplots(1,2)
-    aux2[0].plot(positive_freq, positive_coef)
-    aux2[0].set_title(titulo)
-    aux2[1].plot(positive_freq2, positive_coef2)
-    aux2[1].set_title(titulo2)
-
-    plt.tight_layout()
-    plt.show()
-
 def graficar_senal(datos, datos_suavizados):
     # Extraer componentes de tiempo y aceleración de los datos originales
     tiempo_datos = [par[0] for par in datos]
@@ -109,12 +91,29 @@ def graficar_senal(datos, datos_suavizados):
     plt.show()
 
 def graficar_senal_singular(datos, tiempo):
-    # Extraer componentes de tiempo y aceleración de los datos originales
-    # Graficar la señal original y la señal suavizada
     plt.figure(figsize=(10, 6))
     plt.plot(tiempo, datos, label='Señal original')
     plt.xlabel('Tiempo')
     plt.ylabel('Aceleracion')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
+def graficar_espectros_filtrados(freq1, tfd1, freq2, tfd2):
+    pos_freq1 = freq1[freq1 >=0]
+    pos_tfd1 = tfd1[freq1 >=0]
+    pos_tfd1=np.abs(pos_tfd1)
+
+    pos_freq2 = freq2[freq2 >=0]
+    pos_tfd2 = tfd2[freq2 >=0]
+    pos_tfd2=np.abs(pos_tfd2)
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(pos_freq1, pos_tfd1, label='Espectro original')
+    plt.plot(pos_freq2, pos_tfd2, label='Espectro suavizado')
+    plt.title('Filtrado de altas frecuencias')
+    plt.xlabel('Frecuencias (Hz)')
+    plt.ylabel('Amplitud')
     plt.grid(True)
     plt.legend()
     plt.show()
@@ -156,9 +155,9 @@ print("\nFrecuencias para terremoto2: ", tfd_terremoto2)
 
 # Suavizar las altas frecuencias de los terremotos y graficarlo
 datos_filtrados1 = filtrar(datos_terremoto1)
-#graficar_senal(datos_terremoto1, datos_filtrados1)
+graficar_senal(datos_terremoto1, datos_filtrados1)
 datos_filtrados2 = filtrar(datos_terremoto2)
-#graficar_senal(datos_terremoto2, datos_filtrados2)
+graficar_senal(datos_terremoto2, datos_filtrados2)
 
 #Frecuencia mas afectada
 frecuencias_afectadas1 = freq_max(frecuencias_terremoto1, coeficientes_sfd_terremoto1)
@@ -177,10 +176,14 @@ print("\nLa frecuencia mas afectada en el terremoto2 antes del filtrado fue de "
 print("\nLa frecuencia mas afectada en el terremoto2 despues del filtrado fue de ", frecuencias_afectadadas2_suavizadas, " Hz")
 
 #graficado de la transformada
-#graficar_espectro_continuo(frecuencias_terremoto1, tfd_terremoto1, "terremoto 1")
-#graficar_espectro_continuo(frecuencias_terremoto2, tfd_terremoto2, "terremoto 2")
-#graficar_espectro_continuo(frecuencias_terremoto1, calcular_tfd(coeficientes_sfd_terremoto1_suavizado), "terremoto 1")
-#graficar_espectro_continuo(frecuencias_terremoto2, calcular_tfd(coeficientes_sfd_terremoto2_suavizado), "terremoto 2")
+graficar_espectro_continuo(frecuencias_terremoto1, tfd_terremoto1, "terremoto 1")
+graficar_espectro_continuo(frecuencias_terremoto2, tfd_terremoto2, "terremoto 2")
+graficar_espectro_continuo(frecuencias_terremoto1, calcular_tfd(coeficientes_sfd_terremoto1_suavizado), "terremoto 1")
+graficar_espectro_continuo(frecuencias_terremoto2, calcular_tfd(coeficientes_sfd_terremoto2_suavizado), "terremoto 2")
+
+#comparacion de espectros
+graficar_espectros_filtrados(frecuencias_terremoto1, tfd_terremoto1, frecuencias_terremoto1, calcular_tfd(coeficientes_sfd_terremoto1_suavizado))
+graficar_espectros_filtrados(frecuencias_terremoto2, tfd_terremoto2, frecuencias_terremoto2, calcular_tfd(coeficientes_sfd_terremoto2_suavizado))
 
 datos_terremoto3 = cargar_datos_terr3('terremoto3.txt')
 correlacion_con1 = nivel_de_correlacion([p[1] for p in datos_terremoto1], [p[1] for p in datos_terremoto3])
@@ -237,9 +240,9 @@ maximo_1 = freq_max(frecuencias_terremoto1, resultado_prod_punto_tfd)
 print("\nLa frecuencia mas acelerada de ambas senales es de: ", maximo_1, " Hz en la primera solucion")
 
 #Segunda solucion freq mas acelerada PRODUCTO
-convolucion_senales = np.convolve([p[1] for p in datos_filtrados2_acortados], [p[1] for p in datos_filtrados1], mode='same')
-#convolucion_senales = np.concatenate(([0], convolucion_senales))
-tiempo_convolucion = np.arange(len(convolucion_senales)) / 100
+convolucion_senales = np.convolve([p[1] for p in datos_filtrados2_acortados], [p[1] for p in datos_filtrados1], mode='full')
+convolucion_senales = np.concatenate(([0], convolucion_senales))
+tiempo_convolucion = np.arange(len(convolucion_senales)) / 200
 datos_convolucion = list(zip(tiempo_convolucion, convolucion_senales))
 graficar_senal_singular(convolucion_senales, tiempo_convolucion)
 
