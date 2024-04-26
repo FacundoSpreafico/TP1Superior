@@ -2,9 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.fft as sc
 from scipy.signal import convolve
-from scipy.signal import convolve2d
 from scipy.signal import correlate
-from scipy.interpolate import interp1d
 
 # Función para calcular la TFD a partir de los coeficientes de la SFD
 def calcular_tfd(coeficientes_sfd):
@@ -57,6 +55,10 @@ def freq_max(freqs, coef):
 #suma termino a termino dos tfds
 def suma_tfd(tfd1, tfd2):
     return tfd1 + tfd2
+
+#prod punto de dos tfds
+def prod_punto_tfd(tfd1, tfd2):
+    return tfd1 * tfd2
 
 def graficar_espectro_continuo(freq, coeficientes, titulo):
     positive_freq = freq[freq >= 0]
@@ -189,6 +191,7 @@ if(np.max(correlacion_con1) > np.max(correlacion_con2)):
 else:
     print("\nEl detector 3 esta mas proximo al detector 2")
 
+
 #Primera solucion freq mas acelerada (SUMAS)
 tfd_terremoto1_suavizados = calcular_tfd(coeficientes_sfd_terremoto1_suavizado)
 datos_filtrados2_acortados= acortar_terr2(datos_filtrados2)
@@ -227,8 +230,10 @@ tfd_terremoto1_suavizados = calcular_tfd(coeficientes_sfd_terremoto1_suavizado)
 datos_filtrados2_acortados= acortar_terr2(datos_filtrados2)
 tfd_terremoto2_suavizados_acortado = calcular_tfd(calcular_coeficientes(datos_filtrados2_acortados))
 
+resultado_prod_punto_tfd = prod_punto_tfd(tfd_terremoto1_suavizados, tfd_terremoto2_suavizados_acortado)
+
 graficar_espectro_continuo(frecuencias_terremoto1, resultado_prod_punto_tfd, "Espectro de frecuencias de prod punto de tfds")
-maximo_1 = frecuencias_mas_afectadas(frecuencias_terremoto1, resultado_prod_punto_tfd)
+maximo_1 = freq_max(frecuencias_terremoto1, resultado_prod_punto_tfd)
 print("\nLa frecuencia mas acelerada de ambas senales es de: ", maximo_1, " Hz en la primera solucion")
 
 #Segunda solucion freq mas acelerada PRODUCTO
@@ -239,11 +244,10 @@ datos_convolucion = list(zip(tiempo_convolucion, convolucion_senales))
 graficar_senal_singular(convolucion_senales, tiempo_convolucion)
 
 coeficientes_sfd_convolucion = calcular_coeficientes(datos_convolucion)
-#print("\nArreglo de coeficientes: ", coeficientes_sfd_convolucion)
-#print("\nLong de arreglo de coeficientes: ", len(coeficientes_sfd_convolucion))
 tfd_convolucion = calcular_tfd(coeficientes_sfd_convolucion)
 graficar_espectro_continuo(frecuencias_terremoto1, tfd_convolucion, "Espectro de la convolucion de senales")
 
-maximo_2 = frecuencias_mas_afectadas(frecuencias_terremoto1, tfd_convolucion)
+maximo_2 = freq_max(frecuencias_terremoto1, tfd_convolucion)
 print("\nLa frecuencia mas acelerada de ambas senales es de: ", maximo_2, " Hz en la segunda solucion")
+
 '''
